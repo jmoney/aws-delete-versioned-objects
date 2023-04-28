@@ -41,10 +41,10 @@ func DeleteDeleteMarkerPage(versions *s3.ListObjectVersionsOutput, lastPage bool
 			panic(err)
 		}
 
-		fmt.Printf("Deleted %d delete markers at %s. Earliest in Batch is %s. Continue: %t\n", *versions.MaxKeys, now.Format(time.RFC3339), currentBatch.Format(time.RFC3339), !lastPage && (err == nil))
+		fmt.Printf("Deleted %d delete markers at %s. Earliest in Batch is %s. Continue: %t\n", len(objectsToDelete), now.Format(time.RFC3339), currentBatch.Format(time.RFC3339), !lastPage && (err == nil))
 		return !lastPage && (err == nil)
 	}
-	fmt.Println("Deleted delete markers.")
+	fmt.Println("Not delete markers to delete.")
 	return false
 }
 
@@ -78,10 +78,10 @@ func DeleteVersionPage(versions *s3.ListObjectVersionsOutput, lastPage bool) boo
 			panic(err)
 		}
 
-		fmt.Printf("Deleted %d versions at %s. Earliest in Batch is %s. Continue: %t\n", *versions.MaxKeys, now.Format(time.RFC3339), currentBatch.Format(time.RFC3339), !lastPage && (err == nil))
+		fmt.Printf("Deleted %d versions at %s. Earliest in Batch is %s. Continue: %t\n", len(objectsToDelete), now.Format(time.RFC3339), currentBatch.Format(time.RFC3339), !lastPage && (err == nil))
 		return !lastPage && (err == nil)
 	}
-	fmt.Println("Deleted versions.")
+	fmt.Println("No versions to delete.")
 	return false
 }
 
@@ -94,7 +94,7 @@ func DeletePage(versions *s3.ListObjectVersionsOutput, lastPage bool) bool {
 func main() {
 	bucket := flag.String("bucket", "", "The bucket to delete from")
 	prefix := flag.String("prefix", "", "The prefix to search for objects to delete")
-	maxItems := flag.Int64("max-items", 999, "The maximum amount of items to delete")
+	maxItems := flag.Int64("items-per-page", 999, "The maximum number of items to return per page")
 	flag.Parse()
 
 	err := svc.ListObjectVersionsPages(&s3.ListObjectVersionsInput{
