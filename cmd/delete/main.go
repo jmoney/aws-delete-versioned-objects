@@ -41,10 +41,10 @@ func DeleteDeleteMarkerPage(versions *s3.ListObjectVersionsOutput, lastPage bool
 			panic(err)
 		}
 
-		fmt.Printf("Deleted %d delete markers at %s. Earliest in Batch is %s. Continue: %t\n", len(objectsToDelete), now.Format(time.RFC3339), currentBatch.Format(time.RFC3339), !lastPage && (err == nil))
+		fmt.Printf("Deleted %d delete markers at %s. Earliest in Batch is %s. Continue: %t\n", len(objectsToDelete), now.Local().Format(time.RFC3339), currentBatch.Local().Format(time.RFC3339), !lastPage && (err == nil))
 		return !lastPage && (err == nil)
 	}
-	fmt.Println("Not delete markers to delete.")
+	fmt.Println("No delete markers to delete.")
 	return false
 }
 
@@ -78,7 +78,7 @@ func DeleteVersionPage(versions *s3.ListObjectVersionsOutput, lastPage bool) boo
 			panic(err)
 		}
 
-		fmt.Printf("Deleted %d versions at %s. Earliest in Batch is %s. Continue: %t\n", len(objectsToDelete), now.Format(time.RFC3339), currentBatch.Format(time.RFC3339), !lastPage && (err == nil))
+		fmt.Printf("Deleted %d versions at %s. Earliest in Batch is %s. Continue: %t\n", len(objectsToDelete), now.Local().Format(time.RFC3339), currentBatch.Local().Format(time.RFC3339), !lastPage && (err == nil))
 		return !lastPage && (err == nil)
 	}
 	fmt.Println("No versions to delete.")
