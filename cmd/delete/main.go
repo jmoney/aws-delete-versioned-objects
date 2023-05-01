@@ -38,7 +38,13 @@ func DeleteDeleteMarkerPage(versions *s3.ListObjectVersionsOutput, lastPage bool
 		_, err := svc.DeleteObjects(&input)
 
 		if err != nil {
-			panic(err)
+			fmt.Printf("%v\n", err)
+			time.Sleep(15 * time.Second)
+			svc = s3.New(session.Must(session.NewSession()))
+			_, err := svc.DeleteObjects(&input)
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		fmt.Printf("Deleted %d delete markers at %s. Earliest in Batch is %s. Continue: %t\n", len(objectsToDelete), now.Local().Format(time.RFC3339), currentBatch.Local().Format(time.RFC3339), !lastPage && (err == nil))
@@ -75,7 +81,13 @@ func DeleteVersionPage(versions *s3.ListObjectVersionsOutput, lastPage bool) boo
 		_, err := svc.DeleteObjects(&input)
 
 		if err != nil {
-			panic(err)
+			fmt.Printf("%v\n", err)
+			time.Sleep(15 * time.Second)
+			svc = s3.New(session.Must(session.NewSession()))
+			_, err := svc.DeleteObjects(&input)
+			if err != nil {
+				panic(err)
+			}
 		}
 
 		fmt.Printf("Deleted %d versions at %s. Earliest in Batch is %s. Continue: %t\n", len(objectsToDelete), now.Local().Format(time.RFC3339), currentBatch.Local().Format(time.RFC3339), !lastPage && (err == nil))
@@ -97,13 +109,18 @@ func main() {
 	maxItems := flag.Int64("items-per-page", 999, "The maximum number of items to return per page")
 	flag.Parse()
 
-	err := svc.ListObjectVersionsPages(&s3.ListObjectVersionsInput{
-		Bucket:  bucket,
-		Prefix:  prefix,
-		MaxKeys: maxItems,
-	}, DeletePage)
+	var err = fmt.Errorf("initial")
+	for err != nil {
+		err = svc.ListObjectVersionsPages(&s3.ListObjectVersionsInput{
+			Bucket:  bucket,
+			Prefix:  prefix,
+			MaxKeys: maxItems,
+		}, DeletePage)
 
-	if err != nil {
-		panic(err)
+		if err != nil {
+			fmt.Printf("%v\n", err)
+			time.Sleep(15 * time.Second)
+			svc = s3.New(session.Must(session.NewSession()))
+		}
 	}
 }
